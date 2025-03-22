@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import YouTube, { YouTubeEvent, YouTubePlayer } from "react-youtube";
 import { motion } from "framer-motion";
 import { TimerOverlay } from "./TimerOverlay";
@@ -25,6 +25,7 @@ export function VideoPlayer({
 }: VideoPlayerProps) {
   const playerRef = useRef<YouTubePlayer | null>(null);
   const intervalRef = useRef<number | undefined>(undefined);
+  const [currentTime, setCurrentTime] = useState(startTime);
 
   useEffect(() => {
     return () => {
@@ -40,10 +41,11 @@ export function VideoPlayer({
     playerRef.current.playVideo();
 
     intervalRef.current = window.setInterval(() => {
-      const currentTime = playerRef.current?.getCurrentTime() || 0;
-      onTimeUpdate(currentTime);
+      const time = playerRef.current?.getCurrentTime() || 0;
+      setCurrentTime(time);
+      onTimeUpdate(time);
 
-      if (currentTime >= endTime) {
+      if (time >= endTime) {
         playerRef.current?.pauseVideo();
         if (intervalRef.current) {
           clearInterval(intervalRef.current);
@@ -76,7 +78,7 @@ export function VideoPlayer({
         />
       </div>
 
-      <TimerOverlay currentTime={startTime} style={overlayStyle} />
+      <TimerOverlay currentTime={currentTime} style={overlayStyle} />
 
       <motion.button
         initial={{ opacity: 0 }}
